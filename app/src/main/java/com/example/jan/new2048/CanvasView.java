@@ -108,6 +108,10 @@ public class CanvasView extends View {
     }
     int score = 0;
 
+    public int getScore(){
+        return this.score;
+    }
+
     PopupWindow popUp = new PopupWindow(this);
 
     Cell[][] cells = new Cell[numbOfCell][];

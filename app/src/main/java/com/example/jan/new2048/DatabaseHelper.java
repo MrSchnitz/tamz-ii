@@ -1,6 +1,8 @@
 package com.example.jan.new2048;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -30,6 +32,47 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS highscores");
+        onCreate(db);
+    }
 
+    public boolean insertScore(String nick, int score)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(HIGHSCORES_COLUMN_NICK, nick);
+        contentValues.put(HIGHSCORES_COLUMN_SCORE, score);
+        db.insert(HIGHSCORES_TABLE_NAME, null, contentValues);
+        return true;
+    }
+
+    public Cursor getData(int id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res =  db.rawQuery("select * from highscores where id=" + id + "", null);
+        return res;
+    }
+
+    public void setAllScores()
+    {
+        scoreList.clear();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res =  db.rawQuery( "select * from highscores", null );
+        res.moveToFirst();
+
+        while(res.isAfterLast() == false){
+            scoreList.add(res.getString(res.getColumnIndex(HIGHSCORES_COLUMN_NICK)));
+            res.moveToNext();
+        }
+    }
+
+    public ArrayList<String> getAllScoresNick()
+    {
+        return scoreList;
+    }
+
+    public void removeAll()
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(HIGHSCORES_TABLE_NAME, "1", null);
     }
 }
