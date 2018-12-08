@@ -133,7 +133,7 @@ public class CanvasView extends View {
 
     int canvasX, canvasY, canvasWidth, canvasHeight;
 
-    boolean victory = false;
+    boolean gameOver = false;
 
     boolean init = true;
 
@@ -159,15 +159,6 @@ public class CanvasView extends View {
             }
         }
     }
-
-//
-//    public void drawCells(){
-//        for(int i = 0; i < Cell.numbOfCell; i++){
-//            for(int j = 0; j < Cell.numbOfCell; j++){
-//                cells[i][j].drawCell();
-//            }
-//        }
-//    }
 
 
     public String matchColor(int val){
@@ -268,11 +259,11 @@ public class CanvasView extends View {
         //paint.setStyle(Paint.Style.STROKE);
         canvas.drawRoundRect(canvasX,canvasY,canvasWidth, canvasHeight,10,10,paint);
 
-        if(victory){
+        if(gameOver){
             paint.setColor(Color.RED);
             paint.setTextSize(200);
-            Toast.makeText(getContext(),"Vyhral jste!!!",Toast.LENGTH_SHORT).show();
-            canvas.drawText("Vyhral jste!!!",width/2,height*5, paint);
+            Toast.makeText(getContext(),"Prohral jste!!!",Toast.LENGTH_SHORT).show();
+            canvas.drawText("Prohral jste!!!",width/2,height*5, paint);
         }
         else {
 
@@ -291,6 +282,21 @@ public class CanvasView extends View {
             }
         }
 
+    }
+
+    public void checkLoose(){
+        List<Integer> someCellsLeft = new ArrayList<>();
+
+        for(int i = 0; i < numbOfCell; i++){
+            for(int j = 0; j < numbOfCell; j++){
+                if(cells[i][j].getValue() == 0){
+                    someCellsLeft.add(cells[i][j].getId());
+                }
+            }
+        }
+        if(someCellsLeft.isEmpty()){
+            gameOver = true;
+        }
     }
 
 
@@ -565,8 +571,8 @@ public class CanvasView extends View {
 
         if(changeHappened)
             addNewCell();
-//        else
-//            checkLoose();
+        else
+            checkLoose();
     }
 
 
@@ -653,8 +659,8 @@ public class CanvasView extends View {
 
         if(changeHappened)
             addNewCell();
-//        else
-//            checkLoose();
+        else
+            checkLoose();
     }
 
 
@@ -738,8 +744,8 @@ public class CanvasView extends View {
 
         if(changeHappened)
             addNewCell();
-//        else
-//            checkLoose();
+        else
+            checkLoose();
     }
 
 
@@ -823,8 +829,8 @@ public class CanvasView extends View {
 
         if(changeHappened)
             addNewCell();
-//        else
-//            checkLoose();
+        else
+            checkLoose();
     }
 /*
 
