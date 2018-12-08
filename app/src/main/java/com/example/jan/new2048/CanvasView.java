@@ -1,5 +1,6 @@
 package com.example.jan.new2048;
 
+import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -8,8 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -20,6 +19,7 @@ import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import Model.Cell;
@@ -28,10 +28,6 @@ import listeners.OnSwipeTouchListener;
 import static Model.Cell.numbOfCell;
 
 public class CanvasView extends View {
-
-    Button button = findViewById(R.id.button);
-
-
 
     public CanvasView(final Context context) {
         super(context);
@@ -104,10 +100,19 @@ public class CanvasView extends View {
     }
 
 
+
+
     PopupWindow popUp = new PopupWindow(this);
 
     Cell[][] cells = new Cell[numbOfCell][];
 
+    List<Cell> animatedCells = new ArrayList<>();
+
+    Cell cell;
+
+    boolean animate = false;
+
+    int counter = 0;
 
     Bitmap[] bmp;
 
@@ -127,26 +132,6 @@ public class CanvasView extends View {
     boolean victory = false;
 
     boolean init = true;
-
-
-
-
-    Button.OnTouchListener buttonTouchListener = new Button.OnTouchListener() {
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            switch(event.getAction()){
-                case MotionEvent.ACTION_DOWN:
-                    Toast.makeText(getContext(),"Hmmmm",Toast.LENGTH_SHORT).show();
-                    addNewCell();
-                    return true;
-                    default:
-                    Toast.makeText(getContext(),"Hmmmm",Toast.LENGTH_SHORT).show();
-
-            }
-        return false;
-        }
-    };
 
 
     @Override
@@ -229,6 +214,7 @@ public class CanvasView extends View {
         if(!emptyCells.isEmpty()) {
             Cell chosenCell = emptyCells.get(new Random().nextInt(emptyCells.size()));
 
+            animateRectScale(chosenCell);
 
             chosenCell.setValue(2);
             chosenCell.setColor("#D2691E");
@@ -254,6 +240,8 @@ public class CanvasView extends View {
 
         createCells();
 
+        cell = new Cell(0,0,"#FF7F50",canvasWidth,canvasX, canvasY);
+
         super.onSizeChanged(w, h, oldw, oldh);
     }
 
@@ -274,12 +262,10 @@ public class CanvasView extends View {
         //paint.setStyle(Paint.Style.STROKE);
         canvas.drawRoundRect(canvasX,canvasY,canvasWidth, canvasHeight,10,10,paint);
 
-        Toast.makeText(getContext(),"Width: " + Cell.size,Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getContext(),"Width: " + Cell.size,Toast.LENGTH_SHORT).show();
         //canvas.drawRoundRect(rect,6,6,paint);
 
         //canvas.drawRoundRect(new RectF(0, 100, 100, 200), 30, 30, paint);
-
-
 
 
         if(victory){
@@ -296,6 +282,17 @@ public class CanvasView extends View {
                 }
             }
         }
+
+        if(!animatedCells.isEmpty()){
+
+            for (Cell c : animatedCells){
+                c.drawCell(canvas);
+                Log.d("Animate cell","ANIMATE " + animatedCells.size());
+            }
+        }
+
+        //cell.drawCell(canvas);
+
             /*
             for (int i = 0; i < lx; i++) {
                 for (int j = 0; j < ly; j++) {
@@ -306,17 +303,141 @@ public class CanvasView extends View {
             */
     }
 
-    public void animateRectRight(Cell cell, float translateX){
+    public void animateRectScale(Cell cell){
+        float translateScale = 40;
+
+        ObjectAnimator animateScaleLeft = ObjectAnimator.ofFloat(cell.getRect(), "left", cell.getRect().left, cell.getX()- translateScale);
+        ObjectAnimator animateScaleRight = ObjectAnimator.ofFloat(cell.getRect(), "right", cell.getRect().right, cell.getW()+ translateScale);
+        ObjectAnimator animateScaleTop = ObjectAnimator.ofFloat(cell.getRect(), "top", cell.getRect().top, cell.getY()- translateScale);
+        ObjectAnimator animateScaleBottom = ObjectAnimator.ofFloat(cell.getRect(), "bottom", cell.getRect().bottom, cell.getH()+ translateScale);
+
+        ObjectAnimator animateScaleLeftBack = ObjectAnimator.ofFloat(cell.getRect(), "left", cell.getRect().left- translateScale, cell.getX());
+        ObjectAnimator animateScaleRightBack = ObjectAnimator.ofFloat(cell.getRect(), "right", cell.getRect().right+ translateScale, cell.getW());
+        ObjectAnimator animateScaleTopBack = ObjectAnimator.ofFloat(cell.getRect(), "top", cell.getRect().top- translateScale, cell.getY());
+        ObjectAnimator animateScaleBottomBack = ObjectAnimator.ofFloat(cell.getRect(), "bottom", cell.getRect().bottom+ translateScale, cell.getH());
+
+        animateScaleLeft.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                postInvalidate();
+            }
+        });
+
+        animateScaleLeftBack.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                postInvalidate();
+            }
+        });
+
+        AnimatorSet scaleRectAnimation = new AnimatorSet();
+        scaleRectAnimation.playTogether(animateScaleLeft, animateScaleRight, animateScaleTop, animateScaleBottom);
+        scaleRectAnimation.setDuration(300).start();
+
+
+        final AnimatorSet scaleRectAnimationBack = new AnimatorSet();
+        scaleRectAnimationBack.playTogether(animateScaleLeftBack, animateScaleRightBack, animateScaleTopBack, animateScaleBottomBack);
+
+        scaleRectAnimation.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                scaleRectAnimationBack.setDuration(300).start();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+    }
+
+    public void animateRectMatchCell(Cell cell){
+        float translateScale = 50;
+
+        ObjectAnimator animateScaleLeft = ObjectAnimator.ofFloat(cell.getRect(), "left", cell.getRect().left+ translateScale, cell.getX());
+        ObjectAnimator animateScaleRight = ObjectAnimator.ofFloat(cell.getRect(), "right", cell.getRect().right- translateScale, cell.getW());
+        ObjectAnimator animateScaleTop = ObjectAnimator.ofFloat(cell.getRect(), "top", cell.getRect().top+ translateScale, cell.getY());
+        ObjectAnimator animateScaleBottom = ObjectAnimator.ofFloat(cell.getRect(), "bottom", cell.getRect().bottom- translateScale, cell.getH());
+
+        animateScaleLeft.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                postInvalidate();
+            }
+        });
+
+        AnimatorSet scaleRectAnimation = new AnimatorSet();
+        scaleRectAnimation.playTogether(animateScaleLeft, animateScaleRight, animateScaleTop, animateScaleBottom);
+        scaleRectAnimation.setDuration(300).start();
+    }
+
+    public void animateRectVertically(Cell cell, float translateTop, float translateBottom){
+
+        ObjectAnimator animateTop = ObjectAnimator.ofFloat(cell.getRect(), "top", cell.getRect().top, translateTop);
+        ObjectAnimator animateBottom = ObjectAnimator.ofFloat(cell.getRect(), "bottom", cell.getRect().bottom, translateBottom);
+
+        animateTop.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                postInvalidate();
+                //animatedCells.clear();
+            }
+        });
+
+//        animateTop.setDuration(500).start();
+//        animateBottom.setDuration(500).start();
+
+        AnimatorSet rectAnimation = new AnimatorSet();
+        rectAnimation.playTogether(animateBottom, animateTop);
+        rectAnimation.setDuration(300).start();
+
+        rectAnimation.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                Toast.makeText(getContext(), "animation ended", Toast.LENGTH_LONG).show();
+                animatedCells.clear();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+    }
+
+    public void animateRectHorizontally(Cell cell, float translateLeft, float translateRight){
         //float translateX = 200.0f;
 
-        ObjectAnimator animateRight = ObjectAnimator.ofFloat(cell.getRect(), "right", cell.getRect().right, cell.getRect().right+translateX);
-        ObjectAnimator animateLeft = ObjectAnimator.ofFloat(cell.getRect(), "left", cell.getRect().left, cell.getRect().left+translateX);
-        //ObjectAnimator animateText = ObjectAnimator.ofFloat(cell.getValue(), "text", )
+
+        ObjectAnimator animateRight = ObjectAnimator.ofFloat(cell.getRect(), "right", cell.getRect().right, translateRight);
+        ObjectAnimator animateLeft = ObjectAnimator.ofFloat(cell.getRect(), "left", cell.getRect().left, translateLeft);
 
         animateRight.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 postInvalidate();
+                //animatedCells.clear();
             }
         });
 
@@ -325,8 +446,47 @@ public class CanvasView extends View {
 
         AnimatorSet rectAnimation = new AnimatorSet();
         rectAnimation.playTogether(animateLeft, animateRight);
-        rectAnimation.setDuration(1000).start();
+        rectAnimation.setDuration(300).start();
+
+        rectAnimation.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                Toast.makeText(getContext(), "animation ended", Toast.LENGTH_LONG).show();
+                animatedCells.clear();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
     }
+
+//    public void animateRight(Cell cell, float translateX, float translateW) throws InterruptedException {
+//        int incrementX = (int)(translateX - cell.getX())/20;
+//        int incrementW = (int)(translateW - cell.getW())/20;
+//
+//        Log.d("incerement",incrementX + " " + incrementW);
+//
+//        for(int i = cell.getX(); i < translateX; i++){
+//            cell.setX(cell.getX()+1);
+//            cell.setW(cell.getW()+1);
+//            invalidate();
+//            SystemClock.sleep(5000);
+//            //Thread.sleep(200);
+//        }
+//
+//    }
 
     public void moveRight(){
         int i, j;
@@ -341,7 +501,7 @@ public class CanvasView extends View {
                 if(cells[i][j].getValue() == 0)
                     continue;
 
-                chosen = cells[i][j];
+                chosen = new Cell(cells[i][j]);
                 changed = false;
 
                 for(int k = j+1; k < numbOfCell;k++){
@@ -349,6 +509,13 @@ public class CanvasView extends View {
                         continue;
 
                     if(cells[i][k].getValue() == chosen.getValue()){
+                        //animate move
+                        Cell c = new Cell(i,j, cells[i][j].getColor(),canvasWidth,canvasX, canvasY);
+                        animatedCells.add(c);
+                        animateRectHorizontally(c, cells[i][k].getX(), cells[i][k].getW());
+                        //animate new born cell
+                        animateRectMatchCell(cells[i][k]);
+
                         math = cells[i][k].getValue() * 2;
                         cells[i][k].setValue(math);
                         cells[i][k].setColor(matchColor(math));
@@ -360,15 +527,18 @@ public class CanvasView extends View {
 //                        if(isSoundOn === true) {
 //                            theSound.play();
 //                        }
-//                        break;
+                        break;
                     }
                     else{
                         if((k-1) != j) {
-                            animateRectRight(cells[i][j],cells[i][k - 1].getRect().left);
-//                            cells[i][j].resetCell();
-//                            cells[i][k - 1].resetCell();
-//                            cells[i][k - 1].setValue(chosen.getValue());
-//                            cells[i][k - 1].setColor(chosen.getColor());
+                            //animate move
+                            Cell c = new Cell(i,j, cells[i][j].getColor(),canvasWidth,canvasX, canvasY);
+                            animatedCells.add(c);
+                            animateRectHorizontally(c, cells[i][k-1].getX(), cells[i][k-1].getW());
+
+                            cells[i][k - 1].setValue(chosen.getValue());
+                            cells[i][k - 1].setColor(chosen.getColor());
+                            cells[i][j].resetCell();
                             changeHappened = true;
                         }
                         changed = true;
@@ -377,26 +547,25 @@ public class CanvasView extends View {
 
                 }
 
-                if(changed == false){
-                    // console.log("Vpravo: ")
-                    animateRectRight(cells[i][j],cells[i][numbOfCell-1].getRect().left);
-                    //cells[i][j].resetCell();
-//                    cells[i][numbOfCell-1].setValue(chosen.getValue());
-//                    cells[i][numbOfCell-1].setColor(chosen.getColor());
-                    //cells[i][numbOfCell-1].resetCell();
+                if(!changed){
+                    //animate move
+                    Cell c = new Cell(i,j, cells[i][j].getColor(),canvasWidth,canvasX, canvasY);
+                    animatedCells.add(c);
+                    animateRectHorizontally(c, cells[i][numbOfCell-1].getX(), cells[i][numbOfCell-1].getW());
+
+                    cells[i][numbOfCell-1].setValue(chosen.getValue());
+                    cells[i][numbOfCell-1].setColor(chosen.getColor());
                     changeHappened = true;
+                    cells[i][j].resetCell();
                 }
-
-
-
             }
         }
 //
 //        if(points !== 0)
 //            popupTheText(points);
 
-//        if(changeHappened)
-//            addNewCell();
+        if(changeHappened)
+            addNewCell();
 //        else
 //            checkLoose();
     }
@@ -415,7 +584,7 @@ public class CanvasView extends View {
                 if(cells[i][j].getValue() == 0)
                     continue;
 
-                chosen = cells[i][j];
+                chosen = new Cell(cells[i][j]);
                 changed = false;
 
                 for(int k = i-1; k >= 0;k--){
@@ -423,6 +592,13 @@ public class CanvasView extends View {
                         continue;
 
                     if(cells[k][j].getValue() == chosen.getValue()){
+                        //animate move
+                        Cell c = new Cell(i,j, cells[i][j].getColor(),canvasWidth,canvasX, canvasY);
+                        animatedCells.add(c);
+                        animateRectVertically(c, cells[k][j].getY(), cells[k][j].getH());
+                        //animate new born cell
+                        animateRectMatchCell(cells[k][j]);
+
                         math = cells[k][j].getValue() * 2;
                         cells[k][j].setValue(math);
                         cells[k][j].setColor(matchColor(math));
@@ -440,6 +616,11 @@ public class CanvasView extends View {
                     }
                     else{
                         if((k+1) != i) {
+                            //animate move
+                            Cell c = new Cell(i,j, cells[i][j].getColor(),canvasWidth,canvasX, canvasY);
+                            animatedCells.add(c);
+                            animateRectVertically(c, cells[k+1][j].getY(), cells[k+1][j].getH());
+
                             cells[k + 1][j].setValue(chosen.getValue());
                             cells[k + 1][j].setColor(chosen.getColor());
                             cells[i][j].resetCell();
@@ -451,7 +632,12 @@ public class CanvasView extends View {
 
                 }
 
-                if(changed == false){
+                if(!changed){
+                    //animate move
+                    Cell c = new Cell(i,j, cells[i][j].getColor(),canvasWidth,canvasX, canvasY);
+                    animatedCells.add(c);
+                    animateRectVertically(c, cells[0][j].getY(), cells[0][j].getH());
+
                     cells[0][j].setValue(chosen.getValue());
                     cells[0][j].setColor(chosen.getColor());
                     changeHappened = true;
@@ -486,7 +672,7 @@ public class CanvasView extends View {
                 if(cells[i][j].getValue() == 0)
                     continue;
 
-                chosen = cells[i][j];
+                chosen = new Cell(cells[i][j]);
                 changed = false;
 
                 for(int k = i+1; k < numbOfCell;k++){
@@ -494,6 +680,13 @@ public class CanvasView extends View {
                         continue;
 
                     if(cells[k][j].getValue() == chosen.getValue()){
+                        //animate move
+                        Cell c = new Cell(i,j, cells[i][j].getColor(),canvasWidth,canvasX, canvasY);
+                        animatedCells.add(c);
+                        animateRectVertically(c, cells[k][j].getY(), cells[k][j].getH());
+                        //animate new born cell
+                        animateRectMatchCell(cells[k][j]);
+
                         math = cells[k][j].getValue() * 2;
                         cells[k][j].setValue(math);
                         cells[k][j].setColor(matchColor(math));
@@ -508,6 +701,11 @@ public class CanvasView extends View {
                     }
                     else{
                         if((k-1) != i) {
+                            //animate move
+                            Cell c = new Cell(i,j, cells[i][j].getColor(),canvasWidth,canvasX, canvasY);
+                            animatedCells.add(c);
+                            animateRectVertically(c, cells[k-1][j].getY(), cells[k-1][j].getH());
+
                             cells[k - 1][j].setValue(chosen.getValue());
                             cells[k - 1][j].setColor(chosen.getColor());
                             cells[i][j].resetCell();
@@ -519,8 +717,12 @@ public class CanvasView extends View {
 
                 }
 
-                if(changed == false){
-                    // console.log("Nahore: ")
+                if(!changed){
+                    //animate move
+                    Cell c = new Cell(i,j, cells[i][j].getColor(),canvasWidth,canvasX, canvasY);
+                    animatedCells.add(c);
+                    animateRectVertically(c, cells[numbOfCell-1][j].getY(), cells[numbOfCell-1][j].getH());
+
                     cells[numbOfCell-1][j].setValue(chosen.getValue());
                     cells[numbOfCell-1][j].setColor(chosen.getColor());
                     changeHappened = true;
@@ -555,7 +757,7 @@ public class CanvasView extends View {
                 if(cells[i][j].getValue() == 0)
                     continue;
 
-                chosen = cells[i][j];
+                chosen = new Cell(cells[i][j]);
                 changed = false;
 
                 for(int k = j-1; k >= 0;k--){
@@ -563,6 +765,13 @@ public class CanvasView extends View {
                         continue;
 
                     if(cells[i][k].getValue() == chosen.getValue()){
+                        //animate move
+                        Cell c = new Cell(i,j, cells[i][j].getColor(),canvasWidth,canvasX, canvasY);
+                        animatedCells.add(c);
+                        animateRectHorizontally(c, cells[i][k].getX(), cells[i][k].getW());
+                        //animate new born cell
+                        animateRectMatchCell(cells[i][k]);
+
                         math = cells[i][k].getValue() * 2;
                         cells[i][k].setValue(math);
                         cells[i][k].setColor(matchColor(math));
@@ -577,6 +786,11 @@ public class CanvasView extends View {
                     }
                     else{
                         if((k+1) != j) {
+                            //animate move
+                            Cell c = new Cell(i,j, cells[i][j].getColor(),canvasWidth,canvasX, canvasY);
+                            animatedCells.add(c);
+                            animateRectHorizontally(c, cells[i][k + 1].getX(), cells[i][k + 1].getW());
+
                             cells[i][k + 1].setValue(chosen.getValue());
                             cells[i][k + 1].setColor(chosen.getColor());
                             cells[i][j].resetCell();
@@ -588,7 +802,12 @@ public class CanvasView extends View {
 
                 }
 
-                if(changed == false){
+                if(!changed){
+                    //animate move
+                    Cell c = new Cell(i,j, cells[i][j].getColor(),canvasWidth,canvasX, canvasY);
+                    animatedCells.add(c);
+                    animateRectHorizontally(c, cells[i][0].getX(), cells[i][0].getW());
+
                     cells[i][0].setValue(chosen.getValue());
                     cells[i][0].setColor(chosen.getColor());
                     changeHappened = true;
