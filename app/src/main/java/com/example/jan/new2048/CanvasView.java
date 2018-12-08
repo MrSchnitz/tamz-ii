@@ -16,6 +16,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -100,7 +101,12 @@ public class CanvasView extends View {
     }
 
 
-
+    TextView scoreLabel;
+    public void setScoreLabel(TextView scoreLabel){
+        this.scoreLabel = scoreLabel;
+        scoreLabel.setText("Score: " + score);
+    }
+    int score = 0;
 
     PopupWindow popUp = new PopupWindow(this);
 
@@ -121,8 +127,6 @@ public class CanvasView extends View {
 
     int width;
     int height;
-
-    int score = 0;
 
     int screenWidth = 0;
     int screenHeight = 0;
@@ -240,7 +244,9 @@ public class CanvasView extends View {
 
         createCells();
 
-        cell = new Cell(0,0,"#FF7F50",canvasWidth,canvasX, canvasY);
+
+
+//        cell = new Cell(0,0,"#FF7F50",canvasWidth,canvasX, canvasY);
 
         super.onSizeChanged(w, h, oldw, oldh);
     }
@@ -261,12 +267,6 @@ public class CanvasView extends View {
         paint.setStrokeWidth(20);
         //paint.setStyle(Paint.Style.STROKE);
         canvas.drawRoundRect(canvasX,canvasY,canvasWidth, canvasHeight,10,10,paint);
-
-        //Toast.makeText(getContext(),"Width: " + Cell.size,Toast.LENGTH_SHORT).show();
-        //canvas.drawRoundRect(rect,6,6,paint);
-
-        //canvas.drawRoundRect(new RectF(0, 100, 100, 200), 30, 30, paint);
-
 
         if(victory){
             paint.setColor(Color.RED);
@@ -291,17 +291,14 @@ public class CanvasView extends View {
             }
         }
 
-        //cell.drawCell(canvas);
-
-            /*
-            for (int i = 0; i < lx; i++) {
-                for (int j = 0; j < ly; j++) {
-                    canvas.drawBitmap(bmp[level[i][j]], null,
-                            new Rect(j * width, i * height, (j + 1) * width, (i + 1) * height), null);
-                }
-            }
-            */
     }
+
+
+    public void changeScore(int points){
+        score += points;
+        scoreLabel.setText("Score: " + score);
+    }
+
 
     public void animateRectScale(Cell cell){
         float translateScale = 40;
@@ -520,10 +517,12 @@ public class CanvasView extends View {
                         cells[i][k].setValue(math);
                         cells[i][k].setColor(matchColor(math));
                         cells[i][j].resetCell();
-                        score += math;
+                        changeScore(math);
                         points += math;
                         changed = true;
                         changeHappened = true;
+
+
 //                        if(isSoundOn === true) {
 //                            theSound.play();
 //                        }
@@ -603,7 +602,7 @@ public class CanvasView extends View {
                         cells[k][j].setValue(math);
                         cells[k][j].setColor(matchColor(math));
                         cells[i][j].resetCell();
-                        score += math;
+                        changeScore(math);
                         points += math;
                         changed = true;
                         changeHappened = true;
@@ -691,7 +690,7 @@ public class CanvasView extends View {
                         cells[k][j].setValue(math);
                         cells[k][j].setColor(matchColor(math));
                         cells[i][j].resetCell();
-                        score += math;
+                        changeScore(math);
                         points += math;
                         changed = true;
                         changeHappened = true;
@@ -776,7 +775,7 @@ public class CanvasView extends View {
                         cells[i][k].setValue(math);
                         cells[i][k].setColor(matchColor(math));
                         cells[i][j].resetCell();
-                        score += math;
+                        changeScore(math);
                         points += math;
                         changed = true;
                         changeHappened = true;

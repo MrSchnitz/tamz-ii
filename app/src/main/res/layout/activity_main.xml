@@ -7,20 +7,30 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/button"
+    <TextView
+        android:id="@+id/mainLabel"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Generate Cell"
-        />
+        android:layout_height="146dp"
+        android:fontFamily="@font/aldrich"
+        android:paddingTop="10dp"
+        android:text="2048"
+        android:textSize="80sp"
+        android:textStyle="bold"
+        tools:paddingLeft="20dp" />
+
+    <TextView
+        android:id="@+id/scoreLabel"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:fontFamily="@font/aldrich"
+        android:text="Score:"
+        android:textAlignment="center"
+        android:textSize="30sp" />
 
     <com.example.jan.new2048.CanvasView
+        android:id="@+id/canvasView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent" />
 
-    <!--<com.example.jan.new2048.DrawView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent" />-->
 
 </LinearLayout>
