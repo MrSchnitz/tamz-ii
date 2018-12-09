@@ -5,8 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -18,16 +22,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static ArrayList<String> scoreList = new ArrayList<String>();
 
+    public static Map<String, Integer> scoreMap = new HashMap();
+
     public DatabaseHelper(Context context)
     {
-        super(context, DATABASE_NAME, null, 1);
+        super(context, DATABASE_NAME, null, 2);
     }
 
 
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        db.execSQL("CREATE TABLE highscores " + "(id INTEGER PRIMARY KEY, name TEXT, type INTEGER, cost INTEGER)");
+        db.execSQL("CREATE TABLE highscores " + "(id INTEGER PRIMARY KEY, nick TEXT, score INTEGER)");
     }
 
     @Override
@@ -55,11 +61,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void setAllScores()
     {
         scoreList.clear();
+        scoreMap.clear();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res =  db.rawQuery( "select * from highscores", null );
         res.moveToFirst();
 
-        while(res.isAfterLast() == false){
+        while(!res.isAfterLast()){
+            scoreMap.put(res.getString(res.getColumnIndex(HIGHSCORES_COLUMN_NICK)),res.getInt(res.getColumnIndex(HIGHSCORES_COLUMN_SCORE)));
             scoreList.add(res.getString(res.getColumnIndex(HIGHSCORES_COLUMN_NICK)));
             res.moveToNext();
         }
@@ -68,6 +76,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList<String> getAllScoresNick()
     {
         return scoreList;
+    }
+
+    public Map getAllScores(){
+        return scoreMap;
     }
 
     public void removeAll()

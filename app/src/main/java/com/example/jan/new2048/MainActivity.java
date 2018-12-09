@@ -33,7 +33,7 @@ public class MainActivity extends Activity {
     Button cancelButton;
     EditText editText;
 
-    DatabaseHelper myDb;
+    private DatabaseHelper myDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +50,7 @@ public class MainActivity extends Activity {
         canvasView.setScoreLabel(scoreLabel);
 //        canvasView.setBackgroundColor(Color.LTGRAY);
 
-    }
-
-    public void showDialog(View v){
+        this.myDb = new DatabaseHelper(this);
 
     }
 
@@ -69,7 +67,7 @@ public class MainActivity extends Activity {
         if(myId == R.id.saveScoreItem){
 
             saveDialog.setContentView(R.layout.custom_popup);
-            editText = (EditText) findViewById(R.id.editText);
+            editText = (EditText) saveDialog.findViewById(R.id.editText);
             cancelButton = (Button)saveDialog.findViewById(R.id.cancelButton);
             cancelButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -82,16 +80,17 @@ public class MainActivity extends Activity {
                 @Override
                 public void onClick(View v) {
                     String nick = editText.getText().toString();
-                    //int score = canvasView.getScore();
+                    int score = canvasView.getScore();
 
-                    if(myDb.insertScore(nick,10)){
-                        Toast.makeText(getApplicationContext(), "Score saved", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(getApplicationContext(), "Save clicked", Toast.LENGTH_SHORT).show();
+                    if(myDb.insertScore(nick,score)){
+                        Toast.makeText(getApplicationContext(), "Score saved " + nick + " " + score, Toast.LENGTH_SHORT).show();
                     }else{
                         Toast.makeText(getApplicationContext(), "Score was not saved", Toast.LENGTH_SHORT).show();
                     }
 
-                    //Intent intent = new Intent(getApplicationContext(),WelcomeActivity.class);
-                    //startActivity(intent);
+                    Intent intent = new Intent(getApplicationContext(),WelcomeActivity.class);
+                    startActivity(intent);
                 }
             });
 

@@ -14,7 +14,6 @@ import java.util.ArrayList;
 public class WelcomeActivity extends Activity {
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
