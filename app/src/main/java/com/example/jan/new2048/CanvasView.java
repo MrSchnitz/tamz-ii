@@ -4,17 +4,22 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.ColorDrawable;
+import android.media.MediaPlayer;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,19 +39,19 @@ public class CanvasView extends View {
         super(context);
         setOnTouchListener(new OnSwipeTouchListener(context){
             public void onSwipeTop() {
-                Toast.makeText(getContext(), "top", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "top", Toast.LENGTH_SHORT).show();
                 moveUp();
             }
             public void onSwipeRight() {
-                Toast.makeText(getContext(), "right", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "right", Toast.LENGTH_SHORT).show();
                 moveRight();
             }
             public void onSwipeLeft() {
-                Toast.makeText(getContext(), "left", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "left", Toast.LENGTH_SHORT).show();
                 moveLeft();
             }
             public void onSwipeBottom() {
-                Toast.makeText(getContext(), "bottom", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "bottom", Toast.LENGTH_SHORT).show();
                 moveDown();
             }
         });
@@ -56,19 +61,19 @@ public class CanvasView extends View {
         super(context, attrs);
         setOnTouchListener(new OnSwipeTouchListener(context){
             public void onSwipeTop() {
-                Toast.makeText(getContext(), "top", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "top", Toast.LENGTH_SHORT).show();
                 moveUp();
             }
             public void onSwipeRight() {
-                Toast.makeText(getContext(), "right", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "right", Toast.LENGTH_SHORT).show();
                 moveRight();
             }
             public void onSwipeLeft() {
-                Toast.makeText(getContext(), "left", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "left", Toast.LENGTH_SHORT).show();
                 moveLeft();
             }
             public void onSwipeBottom() {
-                Toast.makeText(getContext(), "bottom", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "bottom", Toast.LENGTH_SHORT).show();
                 moveDown();
             }
         });
@@ -78,19 +83,19 @@ public class CanvasView extends View {
         super(context, attrs, defStyleAttr);
         setOnTouchListener(new OnSwipeTouchListener(context){
             public void onSwipeTop() {
-                Toast.makeText(getContext(), "top", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "top", Toast.LENGTH_SHORT).show();
                 moveUp();
             }
             public void onSwipeRight() {
-                Toast.makeText(getContext(), "right", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "right", Toast.LENGTH_SHORT).show();
                 moveRight();
             }
             public void onSwipeLeft() {
-                Toast.makeText(getContext(), "left", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "left", Toast.LENGTH_SHORT).show();
                 moveLeft();
             }
             public void onSwipeBottom() {
-                Toast.makeText(getContext(), "bottom", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "bottom", Toast.LENGTH_SHORT).show();
                 moveDown();
             }
         });
@@ -99,6 +104,7 @@ public class CanvasView extends View {
     public CanvasView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
+
 
 
     TextView scoreLabel;
@@ -111,6 +117,19 @@ public class CanvasView extends View {
     public int getScore(){
         return this.score;
     }
+
+    MediaPlayer soundPlayer;
+    boolean playSounds = false;
+
+    public void setSoundPlayer(MediaPlayer player){
+        this.soundPlayer = player;
+    }
+
+    public void setPlaySounds(boolean isPlaying){
+        this.playSounds = isPlaying;
+    }
+
+    Dialog saveDialog = new Dialog(getContext());
 
     PopupWindow popUp = new PopupWindow(this);
 
@@ -299,7 +318,48 @@ public class CanvasView extends View {
             }
         }
         if(someCellsLeft.isEmpty()){
+            DatabaseHelper myDb = new DatabaseHelper(getContext());
+
             gameOver = true;
+            saveDialog.setContentView(R.layout.custom_popup);
+            EditText editText = (EditText) saveDialog.findViewById(R.id.editText);
+            Button cancelButton = (Button)saveDialog.findViewById(R.id.cancelButton);
+            cancelButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    saveDialog.dismiss();
+                }
+            });
+            Button saveButton = (Button)saveDialog.findViewById(R.id.saveButton);
+            saveButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String nick = editText.getText().toString();
+                    int score = getScore();
+
+//                    Toast.makeText(getApplicationContext(), "Save clicked", Toast.LENGTH_SHORT).show();
+                    if(myDb.insertScore(nick,score)){
+                        Toast.makeText(getContext(), "Score saved " + nick + " " + score, Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getContext(), "Score was not saved", Toast.LENGTH_SHORT).show();
+                    }
+
+                    Intent intent = new Intent(getContext(),WelcomeActivity.class);
+                    getContext().startActivity(intent);
+                }
+            });
+
+
+            saveDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            saveDialog.show();
+
+        }
+    }
+
+    public void playTheSound(){
+        if(this.playSounds){
+            this.soundPlayer.setLooping(false);
+            this.soundPlayer.start();
         }
     }
 
@@ -417,7 +477,7 @@ public class CanvasView extends View {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                Toast.makeText(getContext(), "animation ended", Toast.LENGTH_LONG).show();
+//                Toast.makeText(getContext(), "animation ended", Toast.LENGTH_LONG).show();
                 animatedCells.clear();
             }
 
@@ -463,7 +523,7 @@ public class CanvasView extends View {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                Toast.makeText(getContext(), "animation ended", Toast.LENGTH_LONG).show();
+//                Toast.makeText(getContext(), "animation ended", Toast.LENGTH_LONG).show();
                 animatedCells.clear();
             }
 
@@ -532,10 +592,8 @@ public class CanvasView extends View {
                         changed = true;
                         changeHappened = true;
 
+                        playTheSound();
 
-//                        if(isSoundOn === true) {
-//                            theSound.play();
-//                        }
                         break;
                     }
                     else{
@@ -616,11 +674,9 @@ public class CanvasView extends View {
                         points += math;
                         changed = true;
                         changeHappened = true;
-                        /*
-                        if(isSoundOn === true) {
-                            theSound.play();
-                        }
-                        */
+
+                        playTheSound();
+
                         break;
                     }
                     else{
@@ -704,9 +760,10 @@ public class CanvasView extends View {
                         points += math;
                         changed = true;
                         changeHappened = true;
-//                        if(isSoundOn === true)
-//                            theSound.play();
-//                        break;
+
+                        playTheSound();
+
+                        break;
                     }
                     else{
                         if((k-1) != i) {
@@ -789,9 +846,10 @@ public class CanvasView extends View {
                         points += math;
                         changed = true;
                         changeHappened = true;
-//                        if(isSoundOn === true)
-//                            theSound.play();
-//                        break;
+
+                        playTheSound();
+
+                        break;
                     }
                     else{
                         if((k+1) != j) {

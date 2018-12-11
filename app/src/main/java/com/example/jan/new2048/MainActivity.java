@@ -5,23 +5,17 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.PopupWindow;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
@@ -33,7 +27,32 @@ public class MainActivity extends Activity {
     Button cancelButton;
     EditText editText;
 
+    Dialog settingsDialog;
+    Button backButton;
+
     private DatabaseHelper myDb;
+
+    private MediaPlayer musicPlayer;
+    private MediaPlayer soundPlayer;
+
+    boolean playMusic = false;
+    boolean playSounds = false;
+
+    Switch soundSwitch;
+    Switch musicSwitch;
+
+    public void setPlayMusic(boolean music){
+        this.playMusic = music;
+    }
+
+    public void setPlaySounds(boolean sounds){
+        this.playSounds = sounds;
+    }
+
+    public void setMusicPlayer(MediaPlayer musicPlayer){
+        this.musicPlayer = musicPlayer;
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,15 +61,37 @@ public class MainActivity extends Activity {
 
         saveDialog = new Dialog(this);
 
+        settingsDialog = new Dialog(this);
+        settingsDialog.setContentView(R.layout.settings_popup);
+
         getWindow().getDecorView().setBackgroundColor(Color.LTGRAY);
 
         scoreLabel = findViewById(R.id.scoreLabel);
         canvasView = findViewById(R.id.canvasView);
 
-        canvasView.setScoreLabel(scoreLabel);
+
 //        canvasView.setBackgroundColor(Color.LTGRAY);
 
         this.myDb = new DatabaseHelper(this);
+
+        musicPlayer = MediaPlayer.create(this,R.raw.gta);
+        musicPlayer.setLooping(true);
+        soundPlayer = MediaPlayer.create(this,R.raw.hit);
+
+        canvasView.setScoreLabel(scoreLabel);
+        canvasView.setPlaySounds(playSounds);
+        canvasView.setSoundPlayer(soundPlayer);
+
+
+//        soundSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                if (isChecked) {
+//                    Toast.makeText(getApplicationContext(),"Sound switch is checked",Toast.LENGTH_SHORT).show();
+//                } else {
+//                    Toast.makeText(getApplicationContext(),"Sound switch is not checked",Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
 
     }
 
@@ -106,6 +147,58 @@ public class MainActivity extends Activity {
             Intent intent = new Intent(this, WelcomeActivity.class);
             startActivity(intent);
         }
+        if(myId == R.id.settingsItem){
+
+            backButton = (Button)settingsDialog.findViewById(R.id.settingsBackButton);
+            backButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    settingsDialog.dismiss();
+                }
+            });
+
+            soundSwitch = (Switch) settingsDialog.findViewById(R.id.soundsSwitch);
+            musicSwitch = (Switch) settingsDialog.findViewById(R.id.musicSwitch);
+
+            if (soundSwitch != null) {
+                soundSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            Toast.makeText(getApplicationContext(),"Sound switch is checked",Toast.LENGTH_SHORT).show();
+                            playSounds = true;
+                            canvasView.setPlaySounds(playSounds);
+                        } else {
+                            Toast.makeText(getApplicationContext(),"Sound switch is not checked",Toast.LENGTH_SHORT).show();
+                            playSounds = false;
+                            canvasView.setPlaySounds(playSounds);
+                        }
+                    }
+                });
+            }
+
+            if(musicSwitch != null){
+                musicSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            Toast.makeText(getApplicationContext(),"Music switch is checked",Toast.LENGTH_SHORT).show();
+                            playMusic = true;
+                            musicPlayer.start();
+                        } else {
+                            Toast.makeText(getApplicationContext(),"Music switch is not checked",Toast.LENGTH_SHORT).show();
+                            playMusic = false;
+                            musicPlayer.pause();
+                        }
+                    }
+                });
+            }
+
+
+            settingsDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            settingsDialog.show();
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
