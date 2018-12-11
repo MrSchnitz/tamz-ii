@@ -117,28 +117,15 @@ public class Cell {
 
         canvas.drawRoundRect(rect,30,30,this.paintRect);
 
-        if(this.value > 8)
+        if(this.value > 8 && this.value < 128)
             canvas.drawText(String.valueOf(this.value),this.x+size/2 - this.textX*2,this.y+size/2+(this.textSize/3),this.paintValue);
+        else if (this.value > 64 && this.value < 1024)
+            canvas.drawText(String.valueOf(this.value),this.x+size/2 - this.textX*3,this.y+size/2+(this.textSize/3),this.paintValue);
+        else if (this.value >= 1024)
+            canvas.drawText(String.valueOf(this.value),this.x+size/2 - this.textX*4,this.y+size/2+(this.textSize/3),this.paintValue);
         else
             canvas.drawText(String.valueOf(this.value),this.x+size/2 - this.textX,this.y+size/2+(this.textSize/3),this.paintValue);
 
-
-
-
-        /*
-        ctx.fillStyle = this.color;
-        // ctx.fillStyle = "rgba(169, 169, 169, 0.5)";
-        ctx.fillRect(this.x, this.y, this.w, this.h);
-        // render(this.x,this.y,this.w,this.h);
-
-        if(this.value !== 0) {
-            fontSize = this.w / 2;
-            ctx.font = fontSize + 'px Arial';
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.fillText(this.value, this.x + this.w / 2, this.y + this.w / 2 + this.w / 7);
-        }
-        */
     }
 
 

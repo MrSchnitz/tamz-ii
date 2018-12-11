@@ -12,12 +12,20 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupWindow;
@@ -31,12 +39,59 @@ import java.util.Random;
 import Model.Cell;
 import listeners.OnSwipeTouchListener;
 
-import static Model.Cell.numbOfCell;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 
-public class CanvasView extends View {
+import static Model.Cell.numbOfCell;
+import static android.content.Context.SENSOR_SERVICE;
+import static android.content.Context.WINDOW_SERVICE;
+
+
+public class CanvasView extends View implements SensorEventListener{
+
+    //Sensors
+    private SensorManager mSensorManager;
+    private Sensor mSensorAccelerometer;
+    private Sensor mSensorMagnetometer;
+
+    private Display mDisplay;
+
+    private float[] mAccelerometerData = new float[3];
+    private float[] mMagnetometerData = new float[3];
+
+    boolean motionControls = false;
+    boolean LEFT = false;
+    boolean RIGHT = false;
+    boolean UP = false;
+    boolean DOWN = false;
 
     public CanvasView(final Context context) {
         super(context);
+
+        mSensorManager = (SensorManager) context.getSystemService(
+                Context.SENSOR_SERVICE);
+        mSensorAccelerometer = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_ACCELEROMETER);
+        mSensorMagnetometer = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_MAGNETIC_FIELD);
+
+        // Get the display from the window manager (for rotation).
+        WindowManager wm = (WindowManager) context.getSystemService(WINDOW_SERVICE);
+        mDisplay = wm.getDefaultDisplay();
+
+
+        if (mSensorAccelerometer != null) {
+            mSensorManager.registerListener(this, mSensorAccelerometer,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        }
+        if (mSensorMagnetometer != null) {
+            mSensorManager.registerListener(this, mSensorMagnetometer,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
+
         setOnTouchListener(new OnSwipeTouchListener(context){
             public void onSwipeTop() {
 //                Toast.makeText(getContext(), "top", Toast.LENGTH_SHORT).show();
@@ -59,6 +114,27 @@ public class CanvasView extends View {
 
     public CanvasView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        mSensorManager = (SensorManager) context.getSystemService(
+                Context.SENSOR_SERVICE);
+        mSensorAccelerometer = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_ACCELEROMETER);
+        mSensorMagnetometer = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_MAGNETIC_FIELD);
+
+        // Get the display from the window manager (for rotation).
+        WindowManager wm = (WindowManager) context.getSystemService(WINDOW_SERVICE);
+        mDisplay = wm.getDefaultDisplay();
+
+
+        if (mSensorAccelerometer != null) {
+            mSensorManager.registerListener(this, mSensorAccelerometer,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        }
+        if (mSensorMagnetometer != null) {
+            mSensorManager.registerListener(this, mSensorMagnetometer,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
         setOnTouchListener(new OnSwipeTouchListener(context){
             public void onSwipeTop() {
 //                Toast.makeText(getContext(), "top", Toast.LENGTH_SHORT).show();
@@ -81,6 +157,28 @@ public class CanvasView extends View {
 
     public CanvasView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
+        mSensorManager = (SensorManager) context.getSystemService(
+                Context.SENSOR_SERVICE);
+        mSensorAccelerometer = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_ACCELEROMETER);
+        mSensorMagnetometer = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_MAGNETIC_FIELD);
+
+        // Get the display from the window manager (for rotation).
+        WindowManager wm = (WindowManager) context.getSystemService(WINDOW_SERVICE);
+        mDisplay = wm.getDefaultDisplay();
+
+
+        if (mSensorAccelerometer != null) {
+            mSensorManager.registerListener(this, mSensorAccelerometer,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        }
+        if (mSensorMagnetometer != null) {
+            mSensorManager.registerListener(this, mSensorMagnetometer,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
         setOnTouchListener(new OnSwipeTouchListener(context){
             public void onSwipeTop() {
 //                Toast.makeText(getContext(), "top", Toast.LENGTH_SHORT).show();
@@ -129,6 +227,10 @@ public class CanvasView extends View {
         this.playSounds = isPlaying;
     }
 
+    public void setMotionControls(boolean motion){
+        this.motionControls = motion;
+    }
+
     Dialog saveDialog = new Dialog(getContext());
 
     PopupWindow popUp = new PopupWindow(this);
@@ -159,6 +261,133 @@ public class CanvasView extends View {
     boolean gameOver = false;
 
     boolean init = true;
+
+
+
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+//        Toast.makeText(getContext(),"X: " + event.values[0],Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getContext(),"Y: " + event.values[1],Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getContext(),"Z: " + event.values[2],Toast.LENGTH_SHORT).show();
+
+
+
+        // The sensor type (as defined in the Sensor class).
+        int sensorType = event.sensor.getType();
+
+
+        switch (sensorType) {
+            case Sensor.TYPE_ACCELEROMETER:
+                mAccelerometerData = event.values.clone();
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                mMagnetometerData = event.values.clone();
+                break;
+            default:
+                return;
+        }
+
+        float[] rotationMatrix = new float[9];
+        boolean rotationOK = SensorManager.getRotationMatrix(rotationMatrix,
+                null, mAccelerometerData, mMagnetometerData);
+
+        // Remap the matrix based on current device/activity rotation.
+        float[] rotationMatrixAdjusted = new float[9];
+        switch (mDisplay.getRotation()) {
+            case Surface.ROTATION_0:
+                rotationMatrixAdjusted = rotationMatrix.clone();
+                break;
+            case Surface.ROTATION_90:
+                SensorManager.remapCoordinateSystem(rotationMatrix,
+                        SensorManager.AXIS_Y, SensorManager.AXIS_MINUS_X,
+                        rotationMatrixAdjusted);
+                break;
+            case Surface.ROTATION_180:
+                SensorManager.remapCoordinateSystem(rotationMatrix,
+                        SensorManager.AXIS_MINUS_X, SensorManager.AXIS_MINUS_Y,
+                        rotationMatrixAdjusted);
+                break;
+            case Surface.ROTATION_270:
+                SensorManager.remapCoordinateSystem(rotationMatrix,
+                        SensorManager.AXIS_MINUS_Y, SensorManager.AXIS_X,
+                        rotationMatrixAdjusted);
+                break;
+        }
+
+        // Get the orientation of the device (azimuth, pitch, roll) based
+        // on the rotation matrix. Output units are radians.
+        float orientationValues[] = new float[3];
+        if (rotationOK) {
+            SensorManager.getOrientation(rotationMatrixAdjusted,
+                    orientationValues);
+        }
+
+        // Pull out the individual values from the array.
+        float azimuth = orientationValues[0];
+        float pitch = orientationValues[1];
+        float roll = orientationValues[2];
+
+
+        if(motionControls) {
+            if (pitch >= -0.08 && pitch <= 0.03) {
+                UP = false;
+                DOWN = false;
+            }
+
+            if (roll >= -0.05 && roll <= 0.05) {
+                RIGHT = false;
+                LEFT = false;
+            }
+
+            if (pitch >= 0.23) {
+                if (!UP) {
+                    moveUp();
+                }
+                DOWN = false;
+                RIGHT = false;
+                LEFT = false;
+                UP = true;
+            }
+
+            if (pitch <= -0.7) {
+                if (!DOWN) {
+                    moveDown();
+                }
+                DOWN = true;
+                RIGHT = false;
+                LEFT = false;
+                UP = false;
+            }
+
+            if (roll >= 0.7) {
+                if (!RIGHT) {
+                    moveRight();
+                }
+                RIGHT = true;
+                UP = false;
+                DOWN = false;
+                LEFT = false;
+            }
+
+            if (roll <= -0.7) {
+                if (!LEFT) {
+                    moveLeft();
+                }
+                LEFT = true;
+                UP = false;
+                DOWN = false;
+                RIGHT = false;
+            }
+        }
+
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
 
 
     @Override
@@ -242,7 +471,6 @@ public class CanvasView extends View {
     }
 
 
-
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         screenWidth = w;
@@ -257,8 +485,6 @@ public class CanvasView extends View {
         height = h / lx;
 
         createCells();
-
-
 
 //        cell = new Cell(0,0,"#FF7F50",canvasWidth,canvasX, canvasY);
 
@@ -304,6 +530,8 @@ public class CanvasView extends View {
                 Log.d("Animate cell","ANIMATE " + animatedCells.size());
             }
         }
+
+//        cell.drawCell(canvas);
 
     }
 
@@ -539,21 +767,6 @@ public class CanvasView extends View {
         });
     }
 
-//    public void animateRight(Cell cell, float translateX, float translateW) throws InterruptedException {
-//        int incrementX = (int)(translateX - cell.getX())/20;
-//        int incrementW = (int)(translateW - cell.getW())/20;
-//
-//        Log.d("incerement",incrementX + " " + incrementW);
-//
-//        for(int i = cell.getX(); i < translateX; i++){
-//            cell.setX(cell.getX()+1);
-//            cell.setW(cell.getW()+1);
-//            invalidate();
-//            SystemClock.sleep(5000);
-//            //Thread.sleep(200);
-//        }
-//
-//    }
 
     public void moveRight(){
         int i, j;
@@ -894,6 +1107,8 @@ public class CanvasView extends View {
         else
             checkLoose();
     }
+
+
 /*
 
     public void moveRight(){

@@ -40,6 +40,7 @@ public class MainActivity extends Activity {
 
     Switch soundSwitch;
     Switch musicSwitch;
+    Switch motionControlsSwitch;
 
     public void setPlayMusic(boolean music){
         this.playMusic = music;
@@ -74,7 +75,7 @@ public class MainActivity extends Activity {
 
         this.myDb = new DatabaseHelper(this);
 
-        musicPlayer = MediaPlayer.create(this,R.raw.gta);
+        musicPlayer = MediaPlayer.create(this,R.raw.evilmorty);
         musicPlayer.setLooping(true);
         soundPlayer = MediaPlayer.create(this,R.raw.hit);
 
@@ -159,6 +160,7 @@ public class MainActivity extends Activity {
 
             soundSwitch = (Switch) settingsDialog.findViewById(R.id.soundsSwitch);
             musicSwitch = (Switch) settingsDialog.findViewById(R.id.musicSwitch);
+            motionControlsSwitch = (Switch) settingsDialog.findViewById(R.id.motionSwitch);
 
             if (soundSwitch != null) {
                 soundSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -189,6 +191,19 @@ public class MainActivity extends Activity {
                             Toast.makeText(getApplicationContext(),"Music switch is not checked",Toast.LENGTH_SHORT).show();
                             playMusic = false;
                             musicPlayer.pause();
+                        }
+                    }
+                });
+            }
+
+            if(motionControlsSwitch != null){
+                motionControlsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if(isChecked){
+                            canvasView.setMotionControls(true);
+                        } else{
+                            canvasView.setMotionControls(false);
                         }
                     }
                 });
