@@ -267,12 +267,6 @@ public class CanvasView extends View implements SensorEventListener{
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-//        Toast.makeText(getContext(),"X: " + event.values[0],Toast.LENGTH_SHORT).show();
-//        Toast.makeText(getContext(),"Y: " + event.values[1],Toast.LENGTH_SHORT).show();
-//        Toast.makeText(getContext(),"Z: " + event.values[2],Toast.LENGTH_SHORT).show();
-
-
-
         // The sensor type (as defined in the Sensor class).
         int sensorType = event.sensor.getType();
 
@@ -534,6 +528,8 @@ public class CanvasView extends View implements SensorEventListener{
 //        cell.drawCell(canvas);
 
     }
+
+
 
     public void checkLoose(){
         List<Integer> someCellsLeft = new ArrayList<>();

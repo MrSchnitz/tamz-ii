@@ -66,9 +66,9 @@ public class WelcomeActivity extends Activity implements SensorEventListener{
         musicPlayer.setLooping(true);
         soundPlayer = MediaPlayer.create(this,R.raw.hit);
 
-        textX = findViewById(R.id.textX);
-        textY = findViewById(R.id.textY);
-        textZ = findViewById(R.id.textZ);
+//        textX = findViewById(R.id.textX);
+//        textY = findViewById(R.id.textY);
+//        textZ = findViewById(R.id.textZ);
 
 //        mSensorManager = (SensorManager) getSystemService(
 //                Context.SENSOR_SERVICE);

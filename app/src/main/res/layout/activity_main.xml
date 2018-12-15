@@ -11,10 +11,11 @@
     <TextView
         android:id="@+id/mainLabel"
         android:layout_width="match_parent"
-        android:layout_height="146dp"
+        android:layout_height="122dp"
         android:fontFamily="@font/aldrich"
         android:paddingTop="10dp"
         android:text="2048"
+        android:textAlignment="center"
         android:textSize="80sp"
         android:textStyle="bold"
         tools:paddingLeft="20dp" />
@@ -26,7 +27,7 @@
         android:fontFamily="@font/aldrich"
         android:text="Score:"
         android:textAlignment="center"
-        android:textSize="30sp" />
+        android:textSize="36sp" />
 
     <com.example.jan.new2048.CanvasView
         android:id="@+id/canvasView"

@@ -75,7 +75,7 @@ public class MainActivity extends Activity {
 
         this.myDb = new DatabaseHelper(this);
 
-        musicPlayer = MediaPlayer.create(this,R.raw.evilmorty);
+        musicPlayer = MediaPlayer.create(this,R.raw.mountainking);
         musicPlayer.setLooping(true);
         soundPlayer = MediaPlayer.create(this,R.raw.hit);
 
