@@ -84,6 +84,7 @@ public class MainActivity extends Activity {
         canvasView.setSoundPlayer(soundPlayer);
 
 
+
 //        soundSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 //            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 //                if (isChecked) {
